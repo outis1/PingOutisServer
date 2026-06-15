@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Outis冠军支持表 · 分路强度榜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0b0e18;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Inter', 'Roboto', sans-serif;
+            color: #eef2ff;
+            padding: 1.2rem 1rem;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        /* 头部区域：info-line 包含左侧统计 + 右侧top-bar */
+        .main-header {
+            margin-bottom: 1rem;
+        }
+        .title {
+            font-size: 1.7rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #8aadff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+            margin-bottom: 0.5rem;
+        }
+        .info-line {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: #b9c7f0;
+        }
+        .stats-text {
+            background: #0a0f1a;
+            padding: 4px 12px;
+            border-radius: 30px;
+            white-space: nowrap;
+        }
+        .right-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+        .feature-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+        .feature {
+            background: #111722;
+            border: 1px solid #2a365a;
+            border-radius: 60px;
+            padding: 4px 14px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .action-btn {
+            background: #191f30;
+            border: 1px solid #31406a;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #eef2ff;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .action-btn.primary {
+            background: #2a3e70;
+            border-color: #5a82ff;
+        }
+        .action-btn.primary:hover { background: #345493; }
+        .action-btn.outline:hover { background: #232e48; }
+
+        /* 筛选区域 */
+        .filter-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.8rem 0 0;
+            background: #0e1322;
+            border-radius: 18px;
+            padding: 0.6rem 1rem;
+        }
+        .search-box {
+            background: #111722;
+            border: 1px solid #2d385a;
+            border-radius: 48px;
+            padding: 5px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 220px;
+            flex-shrink: 0;
+        }
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f0f4ff;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+        .filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            align-items: center;
+        }
+        .filter-cat {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #bfd0ff;
+        }
+        .filter-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-chip {
+            background: #1a2135;
+            padding: 3px 12px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #cfddff;
+            cursor: pointer;
+            transition: 0.08s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .filter-chip.active {
+            background: #3b6eff;
+            color: white;
+        }
+        /* 小圆点 */
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .dot-s { background-color: #fbbf24; box-shadow: 0 0 2px #fbbf24; }
+        .dot-a { background-color: #a855f7; }
+        .dot-b { background-color: #3b82f6; }
+        .dot-c { background-color: #9ca3af; }
+        .dot-new { background-color: #f87171; }
+        .dot-will { background-color: #86efac; }
+
+        /* 英雄列表表格 */
+        .position-table {
+            display: flex;
+            flex-direction: column;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid #252e4c;
+            background: #0b0f1a;
+            margin-top: 0.8rem;
+        }
+        .position-row {
+            display: flex;
+            border-bottom: 1px solid #1f2742;
+        }
+        .position-row:last-child {
+            border-bottom: none;
+        }
+        .row-icon {
+            width: 130px;
+            flex-shrink: 0;
+            background: #0f1424;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.8rem 0.5rem;
+            gap: 6px;
+            border-right: 1px solid #25305a;
+        }
+        .lane-svg svg {
+            width: 66px;
+            height: 66px;
+            display: block;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        }
+        .lane-svg svg path,
+        .lane-svg svg g {
+            fill: #ffffff;
+            stroke: none;
+        }
+        .lane-svg svg g[opacity="0.2"] {
+            opacity: 0.35;
+            fill: #fff9c4;
+        }
+        .lane-count {
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: rgba(0,0,0,0.5);
+            padding: 2px 8px;
+            border-radius: 30px;
+            color: #fff5e0;
+        }
+        .row-heroes {
+            flex: 1;
+            background: #0c1020;
+            padding: 8px 12px;
+            overflow-x: auto;
+        }
+        .heroes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .hero-card {
+            width: 88px;
+            background: #121826;
+            border-radius: 14px;
+            border: 1px solid #2c365e;
+            overflow: hidden;
+            transition: 0.08s linear;
+            flex-shrink: 0;
+            position: relative;
+            cursor: pointer;
+        }
+        .hero-card:hover {
+            transform: translateY(-2px);
+            border-color: #5d7eff;
+            background: #161f30;
+        }
+        .hero-card.will-hero .hero-img img {
+            filter: grayscale(0.85);
+            opacity: 0.8;
+        }
+        .hero-img {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background: #1b2338;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        /* 评级徽章 */
+        .rank-corner {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            z-index: 3;
+            background: #000000cc;
+            backdrop-filter: blur(2px);
+            padding: 2px 7px;
+            border-radius: 18px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: white;
+        }
+        .rank-S { background: #fbbf24; color: #1f1a0a; }
+        .rank-A { background: #a855f7; }
+        .rank-B { background: #3b82f6; }
+        .rank-C { background: #9ca3af; }
+        /* 状态徽章 */
+        .status-corner {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 3;
+            display: flex;
+            gap: 3px;
+        }
+        .status-badge-sm {
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 16px;
+            background: #000000aa;
+            backdrop-filter: blur(2px);
+        }
+        .status-new {
+            background: #f87171;
+            color: white;
+        }
+        .status-will {
+            background: #86efac;
+            color: #1f3a1f;
+        }
+        .empty-msg {
+            color: #6b7ba5;
+            font-size: 0.75rem;
+            padding: 16px;
+            text-align: center;
+            width: 100%;
+        }
+
+        @media (max-width: 800px) {
+            .row-icon { width: 100px; }
+            .lane-svg svg { width: 52px; height: 52px; }
+            .hero-card { width: 78px; }
+            .filter-area { flex-direction: column; align-items: stretch; }
+            .search-box { width: 100%; }
+            .right-group { justify-content: flex-end; }
+        }
+        @media (max-width: 600px) {
+            .hero-card { width: 70px; }
+            .row-icon { width: 85px; }
+            .lane-svg svg { width: 44px; height: 44px; }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 1.8rem;
+            font-size: 0.65rem;
+            color: #64708f;
+            border-top: 1px solid #20273f;
+            padding-top: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="main-header">
+        <div class="title">⚔️ Outis 英雄支持表（CN）</div>
+        <div class="info-line">
+            <div class="stats-text" id="heroStatsText">共 49 位英雄 · 4 新增 · 3 即将推出 · 更新于 2026.06.15</div>
+            <div class="right-group">
+                <div class="feature-row">
+                    <div class="feature">⚙️ 强大的Core架构</div>
+                    <div class="feature">💨 高性能走砍躲避</div>
+                    <div class="feature">🎯 精确意识与监测</div>
+                </div>
+                <div class="action-bar">
+                    <button class="action-btn primary" id="moreBtn">📈 正在推进更多内容</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 筛选区域 -->
+    <div class="filter-area">
+        <div class="search-box">
+            <span>🔍</span>
+            <input type="text" id="searchInput" placeholder="搜索英雄名称" autocomplete="off">
+        </div>
+        <div class="filter-group">
+            <div class="filter-cat">
+                <span class="filter-label">评级</span>
+                <div class="filter-options" id="rankFilterGroup">
+                    <span data-rank="all" class="filter-chip active">全部</span>
+                    <span data-rank="S" class="filter-chip"><span class="dot dot-s"></span>S 优秀</span>
+                    <span data-rank="A" class="filter-chip"><span class="dot dot-a"></span>A 良好</span>
+                    <span data-rank="B" class="filter-chip"><span class="dot dot-b"></span>B 一般</span>
+                    <span data-rank="C" class="filter-chip"><span class="dot dot-c"></span>C 差劲</span>
+                </div>
+            </div>
+            <div class="filter-cat">
+                <span class="filter-label">状态</span>
+                <div class="filter-options" id="statusFilterGroup">
+                    <span data-status="all" class="filter-chip active">全部</span>
+                    <span data-status="new" class="filter-chip"><span class="dot dot-new"></span>NEW 新增</span>
+                    <span data-status="will" class="filter-chip"><span class="dot dot-will"></span>WILL 即将推出</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 英雄列表表格 -->
+    <div id="positionTable" class="position-table"></div>
+    <footer>英雄数据基于官方支持表 · 点击头像获得随机彩蛋</footer>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // 1. 基础英雄列表 (包含新增的普朗克)
+    // --------------------------------------------------------------
+    const BASE_CHAMPIONS = [
+        // 上路 (10位: 原有9 + 普朗克)
+        { en: "DrMundo", zh: "蒙多医生", lane: "top" },
+        { en: "Yone", zh: "永恩", lane: "top" },
+        { en: "Quinn", zh: "奎因", lane: "top" },
+        { en: "Kayle", zh: "凯尔", lane: "top" },
+        { en: "Darius", zh: "德莱厄斯", lane: "top" },
+        { en: "Irelia", zh: "艾瑞莉娅", lane: "top" },
+        { en: "Aatrox", zh: "亚托克斯", lane: "top" },
+        { en: "Jax", zh: "贾克斯", lane: "top" },
+        { en: "Teemo", zh: "提莫", lane: "top" },
+        { en: "Gangplank", zh: "普朗克", lane: "top" },   // 新增 WILL
+        // 中路 (8位: 原有7 + 亚索)
+        { en: "Ahri", zh: "阿狸", lane: "mid" },
+        { en: "Orianna", zh: "奥莉安娜", lane: "mid" },
+        { en: "TwistedFate", zh: "崔斯特", lane: "mid" },
+        { en: "Viktor", zh: "维克托", lane: "mid" },
+        { en: "Lux", zh: "拉克丝", lane: "mid" },
+        { en: "Aurora", zh: "阿萝拉", lane: "mid" },
+        { en: "Xerath", zh: "泽拉斯", lane: "mid" },
+        { en: "Yasuo", zh: "亚索", lane: "mid" },        // WILL
+        // 打野 (8位: 原有7 + 格雷福斯)
+        { en: "Hecarim", zh: "赫卡里姆", lane: "jungle" },
+        { en: "MasterYi", zh: "易", lane: "jungle" },
+        { en: "Belveth", zh: "卑尔维斯", lane: "jungle" },
+        { en: "Lillia", zh: "莉莉娅", lane: "jungle" },
+        { en: "Evelynn", zh: "伊芙琳", lane: "jungle" },
+        { en: "Karthus", zh: "卡尔萨斯", lane: "jungle" },
+        { en: "LeeSin", zh: "盲僧", lane: "jungle" },
+        { en: "Graves", zh: "格雷福斯", lane: "jungle" }, // WILL
+        // ADC 下路 (19位)
+        { en: "Ashe", zh: "艾希", lane: "bot" },
+        { en: "Caitlyn", zh: "凯特琳", lane: "bot" },
+        { en: "Corki", zh: "库奇", lane: "bot" },
+        { en: "Jinx", zh: "金克丝", lane: "bot" },
+        { en: "Kaisa", zh: "卡莎", lane: "bot" },
+        { en: "Ezreal", zh: "伊泽瑞尔", lane: "bot" },
+        { en: "KogMaw", zh: "克格莫", lane: "bot" },
+        { en: "Twitch", zh: "图奇", lane: "bot" },
+        { en: "Sivir", zh: "希维尔", lane: "bot" },
+        { en: "Xayah", zh: "霞", lane: "bot" },
+        { en: "Zeri", zh: "泽丽", lane: "bot" },
+        { en: "Varus", zh: "韦鲁斯", lane: "bot" },
+        { en: "Tristana", zh: "崔丝塔娜", lane: "bot" },
+        { en: "Lucian", zh: "卢锡安", lane: "bot" },
+        { en: "Smolder", zh: "斯莫德", lane: "bot" },
+        { en: "MissFortune", zh: "厄运小姐", lane: "bot" },
+        { en: "Samira", zh: "莎弥拉", lane: "bot" },
+        { en: "Yunara", zh: "芸阿娜", lane: "bot" },
+        { en: "Aphelios", zh: "厄斐琉斯", lane: "bot" },
+        // 辅助 (4位)
+        { en: "Blitzcrank", zh: "布里茨", lane: "support" },
+        { en: "Pyke", zh: "派克", lane: "support" },
+        { en: "Senna", zh: "赛娜", lane: "support" },
+        { en: "Lux", zh: "拉克丝", lane: "support" }   // 注意辅助也有拉克丝
+    ];
+
+    // 构建英雄数组，初始 status = normal, tier = ''
+    let heroes = BASE_CHAMPIONS.map((h, idx) => ({
+        id: idx,
+        en: h.en,
+        zh: h.zh,
+        lane: h.lane,
+        tier: '',        // 默认无评级
+        status: 'normal'
+    }));
+
+    // 2. 根据用户要求重新评级 (S/A/B/C)
+    const rankMap = {
+        // S 级
+        "永恩": "S", "德莱厄斯": "S", "亚托克斯": "S", "阿狸": "S", "奥莉安娜": "S",
+        "崔斯特": "S", "易": "S", "盲僧": "S", "金克丝": "S", "卡莎": "S",
+        "伊泽瑞尔": "S", "图奇": "S", "霞": "S", "泽丽": "S", "韦鲁斯": "S",
+        "崔丝塔娜": "S", "莎弥拉": "S", "派克": "S",
+        // A 级
+        "蒙多医生": "A", "奎因": "A", "艾瑞莉娅": "A", "贾克斯": "A", "赫卡里姆": "A",
+        "卡尔萨斯": "A", "艾希": "A", "库奇": "A", "克格莫": "A", "希维尔": "A",
+        "卢锡安": "A", "斯莫德": "A", "芸阿娜": "A", "布里茨": "A", "赛娜": "A",
+        // B 级
+        "凯尔": "B", "维克托": "B", "阿萝拉": "B", "拉克丝": "B", "卑尔维斯": "B", "莉莉娅": "B",
+        "伊芙琳": "B", "厄斐琉斯": "B",
+        // C 级
+        "凯特琳": "C", "厄运小姐": "C"
+    };
+
+    // 应用评级
+    heroes.forEach(hero => {
+        if (rankMap[hero.zh]) {
+            hero.tier = rankMap[hero.zh];
+        } else {
+            hero.tier = '';  // 未评级不显示
+        }
+    });
+
+    // 3. 设置 NEW 英雄 (提莫, 贾克斯, 盲僧, 泽拉斯)
+    const newNames = ["提莫", "贾克斯", "盲僧", "泽拉斯"];
+    // 先全部重置为 normal (避免之前遗留)
+    heroes.forEach(h => { if (newNames.includes(h.zh)) h.status = 'new'; else if (!["格雷福斯","亚索","普朗克"].includes(h.zh)) h.status = 'normal'; });
+    // 再单独设置 new
+    heroes.forEach(h => { if (newNames.includes(h.zh)) h.status = 'new'; });
+
+    // 4. 设置 WILL 英雄 (格雷福斯, 亚索, 普朗克)
+    const willNames = ["格雷福斯", "亚索", "普朗克"];
+    heroes.forEach(h => { if (willNames.includes(h.zh)) h.status = 'will'; });
+
+    // 验证数量
+    const newCount = heroes.filter(h => h.status === 'new').length;   // 4
+    const willCount = heroes.filter(h => h.status === 'will').length; // 3
+    const totalHeroes = heroes.length; // 10+8+8+19+4 = 49? 实际计算: top:10, mid:8, jungle:8, bot:19, support:4 = 49
+    document.getElementById('heroStatsText').innerText = `共 ${totalHeroes} 位英雄 · ${newCount} 新增 · ${willCount} 即将推出 · 更新于 2026.06.15`;
+
+    // 分路配置
+    const LANES = [
+        { key: "top", label: "上路", iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="nonzero"><path d="m19 3-4 4H7v8l-4 4V3z"></path><path d="m5 21 4-4h8V9l4-4v16z" opacity="0.2"></path><path d="M10 10h4v4h-4z" opacity="0.2"></path></g></svg>` },
+        { key: "jungle", label: "打野", iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="nonzero" d="M5.14 2c1.58 1.21 5.58 5.023 6.976 9.953s0 10.047 0 10.047c-2.749-3.164-5.893-5.2-6.18-5.382l-.02-.013C5.45 13.814 3 8.79 3 8.79c3.536.867 4.93 4.279 4.93 4.279C7.558 8.698 5.14 2 5.14 2m14.976 5.907s-1.243 2.471-1.814 4.604c-.235.878-.285 2.2-.29 3.058v.282c.003.347.01.568.01.568s-1.738 2.397-3.38 3.678a27.5 27.5 0 0 0-.208-5.334c.928-2.023 2.846-5.454 5.682-6.856m-2.124-5.331s-2.325 3.052-2.836 6.029c-.11.636-.201 1.194-.284 1.695-.379.584-.73 1.166-1.05 1.733-.033-.125-.06-.25-.095-.375a21 21 0 0 0-1.16-3.08c.053-.146.103-.29.17-.438 0 0 1.814-3.78 5.255-5.564"></path></svg>` },
+        { key: "mid", label: "中路", iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="nonzero"><path d="m15 3-4 4H7v4l-4 4V3zM9 21l4-4h4v-4l4-4v12z" opacity="0.2"></path><path d="M18 3h3v3L6 21H3v-3z"></path></g></svg>` },
+        { key: "bot", label: "下路", iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="nonzero"><path d="m19 3-4 4H7v8l-4 4V3z" opacity="0.2"></path><path d="m5 21 4-4h8V9l4-4v16z"></path><path d="M10 10h4v4h-4z" opacity="0.2"></path></g></svg>` },
+        { key: "support", label: "辅助", iconSvg: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="nonzero" d="M12.833 10.833 14.5 17.53v.804L12.833 20h-1.666L9.5 18.333v-.804l1.667-6.696zM7 7.5 9.5 10l-1.667 4.167-2.5-2.5L6.167 10h-2.5L2 7.5zm15 0L20.333 10h-2.5l.834 1.667-2.5 2.5L14.5 10 17 7.5zM13.743 5l.757.833v.834l-1.667 2.5h-1.666L9.5 6.667v-.834L10.257 5z"></path></svg>` }
+    ];
+
+    // 筛选变量
+    let currentRank = 'all';
+    let currentStatus = 'all';
+    let searchKeyword = '';
+
+    const tableContainer = document.getElementById('positionTable');
+    const searchInput = document.getElementById('searchInput');
+
+    const getImgUrl = (en) => `https://ddragon.leagueoflegends.com/cdn/16.12.1/img/champion/${en}.png`;
+    const fallbackIcon = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231d2a44'/%3E%3Ctext x='50' y='55' text-anchor='middle' fill='%238aa2ff' font-size='12'%3EOS%3C/text%3E%3C/svg%3E";
+
+    function filterHeroes() {
+        let filtered = [...heroes];
+        if (currentRank !== 'all') {
+            filtered = filtered.filter(h => h.tier === currentRank);
+        }
+        if (currentStatus !== 'all') {
+            filtered = filtered.filter(h => h.status === currentStatus);
+        }
+        if (searchKeyword.trim() !== '') {
+            const kw = searchKeyword.trim().toLowerCase();
+            filtered = filtered.filter(h => h.zh.toLowerCase().includes(kw) || h.en.toLowerCase().includes(kw));
+        }
+        return filtered;
+    }
+
+    function groupByLane(arr) {
+        const groups = { top: [], mid: [], jungle: [], bot: [], support: [] };
+        arr.forEach(h => { if (groups[h.lane]) groups[h.lane].push(h); });
+        return groups;
+    }
+
+    function render() {
+        const filtered = filterHeroes();
+        const grouped = groupByLane(filtered);
+
+        let html = '';
+        for (let lane of LANES) {
+            const laneHeroes = grouped[lane.key] || [];
+            const count = laneHeroes.length;
+            html += `<div class="position-row">
+                        <div class="row-icon">
+                            <div class="lane-svg">${lane.iconSvg}</div>
+                            <div class="lane-count">${count} 位英雄</div>
+                        </div>
+                        <div class="row-heroes">
+                            <div class="heroes-grid">`;
+            if (count === 0) {
+                html += `<div class="empty-msg">✨ 暂无英雄，调整筛选试试</div>`;
+            } else {
+                laneHeroes.forEach(hero => {
+                    let rankHtml = '';
+                    if (hero.tier && ['S','A','B','C'].includes(hero.tier)) {
+                        const rankClass = hero.tier === 'S' ? 'rank-S' : (hero.tier === 'A' ? 'rank-A' : (hero.tier === 'B' ? 'rank-B' : 'rank-C'));
+                        rankHtml = `<div class="rank-corner ${rankClass}">${hero.tier}</div>`;
+                    }
+                    let statusHtml = '';
+                    if (hero.status === 'new') statusHtml = `<div class="status-badge-sm status-new">NEW</div>`;
+                    else if (hero.status === 'will') statusHtml = `<div class="status-badge-sm status-will">WILL</div>`;
+                    const willClass = hero.status === 'will' ? 'will-hero' : '';
+                    const imgUrl = getImgUrl(hero.en);
+                    // 添加 title 属性用于悬浮显示英雄名
+                    html += `<div class="hero-card ${willClass}" data-hero-id="${hero.id}" title="${hero.zh}">
+                                <div class="hero-img">
+                                    <img src="${imgUrl}" alt="${hero.zh}" loading="lazy" onerror="this.src='${fallbackIcon}'">
+                                    ${rankHtml}
+                                    <div class="status-corner">${statusHtml}</div>
+                                </div>
+                            </div>`;
+                });
+            }
+            html += `</div></div></div>`;
+        }
+        tableContainer.innerHTML = html;
+
+        // 绑定点击彩蛋
+        document.querySelectorAll('.hero-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(card.getAttribute('data-hero-id'));
+                const hero = heroes.find(h => h.id === id);
+                if (hero) {
+                    const msgs = [
+                        `${hero.zh}：今日对线强度在线！`,
+                        `${hero.zh} 版本支援效率↑`,
+                        `OS认证，${hero.zh} 团战发挥稳定`,
+                        `选 ${hero.zh}，队友压力少一半`,
+                        `${hero.zh} 已经在分路打出气势`
+                    ];
+                    toastMsg(msgs[Math.floor(Math.random() * msgs.length)], 'fun');
+                }
+            });
+        });
+    }
+
+    let toastTimer = null;
+    function toastMsg(msg, type) {
+        let existing = document.getElementById('dynamicToast');
+        if (existing) existing.remove();
+        const div = document.createElement('div');
+        div.id = 'dynamicToast';
+        div.innerText = msg;
+        div.style.position = 'fixed';
+        div.style.bottom = '24px';
+        div.style.left = '50%';
+        div.style.transform = 'translateX(-50%)';
+        div.style.backgroundColor = '#2d3e6e';
+        div.style.color = 'white';
+        div.style.padding = '6px 18px';
+        div.style.borderRadius = '40px';
+        div.style.fontSize = '0.8rem';
+        div.style.zIndex = '9999';
+        div.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        div.style.border = '1px solid #5a74b0';
+        document.body.appendChild(div);
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => div.remove(), 1800);
+    }
+
+    function bindEvents() {
+        document.querySelectorAll('#rankFilterGroup .filter-chip').forEach(el => {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('#rankFilterGroup .filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentRank = this.getAttribute('data-rank');
+                render();
+            });
+        });
+        document.querySelectorAll('#statusFilterGroup .filter-chip').forEach(el => {
+            el.addEventListener('click', function() {
+                document.querySelectorAll('#statusFilterGroup .filter-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentStatus = this.getAttribute('data-status');
+                render();
+            });
+        });
+        searchInput.addEventListener('input', (e) => {
+            searchKeyword = e.target.value;
+            render();
+        });
+    }
+
+
+
+    bindEvents();
+    render();
+</script>
+</body>
+</html>
