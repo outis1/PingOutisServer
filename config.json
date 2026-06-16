@@ -1,0 +1,18 @@
+{
+    "SMTP_SERVER": "smtp.qq.com",
+    "SMTP_PORT": 465,
+
+  "_comment_smtp": "===== 发件人配置 =====",
+    "SENDER_EMAIL": "977026046@qq.com",
+    "AUTH_CODE": "hjipffaovmxpbedb",
+
+    "_comment_receiver": "===== 收件人配置 多个逗号隔开=====",
+    "RECEIVER_EMAILS": ["634203882@qq.com", "1936475492@qq.com", "2946525286@qq.com", "1163851423@qq.com", "739762240@qq.com","981667452@qq.com"],
+
+    "TARGET_HOST": "134.122.160.210",
+    "PING_TIMEOUT_SEC": 5,
+    "PING_INTERVAL_SECONDS": 5,
+    "CONSECUTIVE_FAILURES_THRESHOLD": 5,
+    "CONSECUTIVE_SUCCESSES_THRESHOLD": 3,
+    "RATE_LIMIT_SECONDS": 1
+}
